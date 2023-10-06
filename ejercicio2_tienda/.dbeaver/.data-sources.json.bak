@@ -1,7 +1,23 @@
 {
 	"folders": {},
 	"connections": {
-		"mysql8-18b0237bca3-2b6c652c789a35cc": {
+		"mysql8-18afce16d65-26dca39740d7edbc": {
+			"provider": "mysql",
+			"driver": "mysql8",
+			"name": "tienda",
+			"save-password": true,
+			"configuration": {
+				"host": "localhost",
+				"port": "3306",
+				"database": "tienda",
+				"url": "jdbc:mysql://localhost:3306/tienda",
+				"configurationType": "MANUAL",
+				"home": "C:\\Program Files\\MySQL\\MySQL Router 8.0",
+				"type": "dev",
+				"auth-model": "native"
+			}
+		},
+		"mysql8-18b02354703-6cb6cbafc18605b0": {
 			"provider": "mysql",
 			"driver": "mysql8",
 			"name": "localhost",

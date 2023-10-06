@@ -52,28 +52,51 @@ LIMIT 1;
 
 -- Ejercicio 4: Lista todos los productos del fabricante Asus que tienen un precio superior al precio
 -- medio de todos sus productos.
-SELECT 
-    *
-FROM
-    producto
-WHERE
-    precio > (SELECT 
-            AVG(precio)
-        FROM
-            producto
-        WHERE
-            codigo_fabricante = (SELECT 
-                    codigo
-                FROM
-                    fabricante
-                WHERE
-                    nombre LIKE '%Asus%'))
-        AND codigo_fabricante = (SELECT 
-            codigo
-        FROM
-            fabricante
-        WHERE
-            nombre LIKE '%Asus%');
+-- opcion1
+select
+	*
+from
+	producto
+where
+	precio > (
+	select
+		AVG(precio)
+	from
+		producto
+	where
+		codigo_fabricante = (
+		select
+			codigo
+		from
+			fabricante
+		where
+			nombre = 'Asus'))
+	and codigo_fabricante = (
+	select
+		codigo
+	from
+		fabricante
+	where
+		nombre = 'Asus');
+
+-- opcion 2
+select
+	*
+from
+	producto
+where
+	codigo_fabricante = (
+	select
+		codigo
+	from
+		fabricante
+	where
+		nombre = 'Asus')
+	and precio > (
+	select
+		avg(precio)
+	from
+		producto);
             
 -- Subconsultas con IN y NOT IN
 -- Ejercicio 1: Devuelve los nombres de los fabricantes que tienen productos asociados. (Utilizando IN o

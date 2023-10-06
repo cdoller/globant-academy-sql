@@ -48,7 +48,7 @@ FROM
         LEFT JOIN
     fabricante ON producto.codigo_fabricante = fabricante.codigo
 WHERE
-    fabricante.nombre LIKE '%Lenovo%';
+    fabricante.nombre ='Lenovo';
     
 -- Ejercicio 5: Devuelve una lista de todos los productos del fabricante Crucial que tengan un precio
 -- mayor que $200.
@@ -59,7 +59,7 @@ FROM
         LEFT JOIN
     fabricante ON producto.codigo_fabricante = fabricante.codigo
 WHERE
-    fabricante.nombre LIKE '%crucial%'
+    fabricante.nombre = 'crucial'
         AND producto.precio > 200;
         
 -- Ejercicio 6: Devuelve un listado con todos los productos de los fabricantes Asus, Hewlett-Packard.

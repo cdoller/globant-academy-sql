@@ -1,1 +1,1 @@
-{"resources":{"ejerciciosSubConsultas.sql":{"default-datasource":"mysql8-18afce16d65-26dca39740d7edbc","default-catalog":"tienda"}}}
+{"resources":{"ejercicios1-15.sql":{"default-datasource":"mysql8-18b0237bca3-2b6c652c789a35cc"},"ejerciciosConsultasMultitabla.sql":{"default-datasource":"mysql8-18b0237bca3-2b6c652c789a35cc","default-catalog":"tienda"},"ejerciciosSubConsultas.sql":{"default-datasource":"mysql8-18b0237bca3-2b6c652c789a35cc","default-catalog":"tienda"}}}

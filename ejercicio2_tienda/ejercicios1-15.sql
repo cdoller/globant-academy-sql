@@ -68,6 +68,8 @@ FROM
 ORDER BY precio ASC
 LIMIT 1;
 
+select min(precio) from producto;
+
 -- Ejercicio 11: Lista el nombre y el precio del producto más caro. (Utilice solamente las cláusulas ORDER
 -- BY y LIMIT)
 SELECT 
