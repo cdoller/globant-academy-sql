@@ -105,7 +105,7 @@ select
 	codigo_cliente,
 	fecha_esperada,
 	fecha_entrega,
-	datediff(fecha_esperada, fecha_entrega) as dias_antes
+	datediff(fecha_esperada, fecha_entrega) as dias_anes
 from
 	pedido
 where
@@ -113,7 +113,8 @@ where
 
 -- 11. Devuelve un listado de todos los pedidos que fueron rechazados en 2009.
 select
-	p.*
+	p.codigo_pedido,
+	p.estado 
 from
 	pedido p
 where
@@ -149,3 +150,159 @@ select distinct forma_pago from pago;
 -- 15. Devuelve un listado con todos los productos que pertenecen a la gama Ornamentales y que
 -- tienen más de 100 unidades en stock. El listado deberá estar ordenado por su precio de
 -- venta, mostrando en primer lugar los de mayor precio.
+select
+	*
+from
+	producto
+where
+	gama = 'Ornamentales'
+	and cantidad_en_stock > 100
+order by
+	precio_venta desc;
+
+-- 16. Devuelve un listado con todos los clientes que sean de la ciudad de Madrid y cuyo
+-- representante de ventas tenga el código de empleado 11 o 30.
+select
+	*
+from
+	cliente
+where
+	ciudad = 'Madrid'
+	and codigo_empleado_rep_ventas in (11, 30);
+
+-- Consultas multitabla (Composición interna)
+
+-- Las consultas se deben resolver con INNER JOIN.
+-- 1. Obtén un listado con el nombre de cada cliente y el nombre y apellido de su representante
+-- de ventas.
+select
+	c.nombre_cliente,
+	concat(nombre, " ", apellido1, " ", apellido2) as nombre_completo_empleado
+from
+	cliente c
+inner join empleado e on
+	c.codigo_empleado_rep_ventas = e.codigo_empleado;
+
+-- 2. Muestra el nombre de los clientes que hayan realizado pagos junto con el nombre de sus
+-- representantes de ventas.
+select
+	c.nombre_cliente,
+	concat(nombre, " ", apellido1, " ", apellido2) as nombre_completo_empleado,
+	p.id_transaccion 
+from
+	cliente c
+inner join empleado e on
+	c.codigo_empleado_rep_ventas = e.codigo_empleado
+inner join pago p on
+	c.codigo_cliente = p.codigo_cliente ;
+
+-- 3. Muestra el nombre de los clientes que no hayan realizado pagos junto con el nombre de
+-- sus representantes de ventas.
+select
+	c.nombre_cliente,
+	concat(nombre, " ", apellido1, " ", apellido2) as nombre_completo_empleado,
+	p.id_transaccion
+from
+	cliente c
+inner join empleado e on
+	c.codigo_empleado_rep_ventas = e.codigo_empleado
+left join pago p on
+	c.codigo_cliente = p.codigo_cliente
+where
+	p.id_transaccion is null;
+
+-- 4. Devuelve el nombre de los clientes que han hecho pagos y el nombre de sus representantes
+-- junto con la ciudad de la oficina a la que pertenece el representante.
+select
+	c.nombre_cliente,
+	concat(nombre, " ", apellido1, " ", apellido2) as nombre_completo_representante,
+	p.id_transaccion,
+	o.ciudad as ciudad_representante
+from
+	cliente c
+inner join empleado e on
+	c.codigo_empleado_rep_ventas = e.codigo_empleado
+inner join pago p on
+	c.codigo_cliente = p.codigo_cliente 
+inner join oficina o on
+	e.codigo_oficina = o.codigo_oficina ;
+	
+-- 5. Devuelve el nombre de los clientes que no hayan hecho pagos y el nombre de sus
+-- representantes junto con la ciudad de la oficina a la que pertenece el representante.
+select
+	c.nombre_cliente,
+	concat(nombre, " ", apellido1, " ", apellido2) as nombre_completo_representante,
+	p.id_transaccion,
+	o.ciudad as ciudad_representante
+from
+	cliente c
+inner join empleado e on
+	c.codigo_empleado_rep_ventas = e.codigo_empleado
+left join pago p on
+	c.codigo_cliente = p.codigo_cliente 
+inner join oficina o on
+	e.codigo_oficina = o.codigo_oficina
+where
+	p.id_transaccion is null;
+	
+-- 6. Lista la dirección de las oficinas que tengan clientes en Fuenlabrada.
+select
+	o.codigo_oficina,
+	o.ciudad,
+	o.linea_direccion1,
+	c.nombre_cliente ,
+	c.ciudad
+from
+	oficina o
+inner join empleado e on o.codigo_oficina = e.codigo_oficina 
+inner join cliente c on c.codigo_empleado_rep_ventas = e.codigo_empleado 
+where c.ciudad = 'Fuenlabrada' ;
+
+-- 7. Devuelve el nombre de los clientes y el nombre de sus representantes junto con la ciudad
+-- de la oficina a la que pertenece el representante.
+select
+	c.nombre_cliente, 
+	concat(e.nombre, " ", e.apellido1, " ", e.apellido2) as nombre_completo_representante,
+	o.ciudad as ciudad_oficina_representante
+from
+	cliente c
+inner join empleado e on c.codigo_empleado_rep_ventas = e.codigo_empleado 
+inner join oficina o on o.codigo_oficina = e.codigo_oficina 
+order by nombre_completo_representante asc;
+
+-- 8. Devuelve un listado con el nombre de los empleados junto con el nombre de sus jefes.
+select
+	concat(e.nombre, " ", e.apellido1, " ", e.apellido2) as nombre_completo_empleado,
+	concat(e1.nombre, " ", e1.apellido1, " ", e1.apellido2) as nombre_completo_jefe
+from
+	empleado e
+inner join empleado e1 on e.codigo_jefe = e1.codigo_empleado ;
+
+-- 9. Devuelve el nombre de los clientes a los que no se les ha entregado a tiempo un pedido.
+select
+	c.nombre_cliente,
+	count(*) as cantidad_pedidos_entregados_retrasados
+from
+	cliente c
+inner join pedido p on
+	c.codigo_cliente = p.codigo_cliente 
+where
+	p.fecha_entrega > p.fecha_esperada 
+group by c.nombre_cliente ;
+
+
+-- 10. Devuelve un listado de las diferentes gamas de producto que ha comprado cada cliente.
+select
+	c.nombre_cliente,
+	p.gama
+from
+	producto p
+inner join detalle_pedido dp on
+	p.codigo_producto = dp.codigo_producto 
+inner join pedido p2 on
+	dp.codigo_pedido = p2.codigo_pedido 
+inner join cliente c on
+	p2.codigo_cliente = c.codigo_cliente 
+group by p.gama, c.nombre_cliente 
+order by c.nombre_cliente;
+
