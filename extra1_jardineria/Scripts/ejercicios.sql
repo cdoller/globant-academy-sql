@@ -306,3 +306,148 @@ inner join cliente c on
 group by p.gama, c.nombre_cliente 
 order by c.nombre_cliente;
 
+-- Consultas multitabla (Composición externa)
+-- Resuelva todas las consultas utilizando las cláusulas LEFT JOIN, RIGHT JOIN, JOIN.
+
+-- 1. Devuelve un listado que muestre solamente los clientes que no han realizado ningún pago.
+select
+	c.*
+from
+	cliente c
+left join pago p on
+	c.codigo_cliente = p.codigo_cliente
+where
+	p.id_transaccion is null;
+
+-- 2. Devuelve un listado que muestre solamente los clientes que no han realizado ningún
+-- pedido.
+select
+	c.*,
+	p.codigo_pedido
+from
+	cliente c
+left join pedido p on
+	c.codigo_cliente = p.codigo_cliente
+where
+	p.codigo_cliente is null;
+	
+-- 3. Devuelve un listado que muestre los clientes que no han realizado ningún pago y los que
+-- no han realizado ningún pedido.
+select
+	c.* ,
+	p.codigo_pedido,
+	p2.id_transaccion
+from
+	cliente c
+left join pedido p on
+	c.codigo_cliente = p.codigo_cliente
+left join pago p2 on
+	c.codigo_cliente = p2.codigo_cliente
+where
+	p.codigo_cliente is null
+	and p2.id_transaccion is null;
+	
+-- 4. Devuelve un listado que muestre solamente los empleados que no tienen una oficina
+-- asociada.
+select
+	e.*
+from
+	empleado e
+left join oficina o on
+	e.codigo_oficina = o.codigo_oficina
+where
+	o.codigo_oficina is null;
+	
+-- 5. Devuelve un listado que muestre solamente los empleados que no tienen un cliente
+-- asociado.
+select
+	e.*,
+	c.codigo_empleado_rep_ventas
+from
+	empleado e
+left join cliente c on
+	e.codigo_empleado = c.codigo_empleado_rep_ventas
+where 
+	c.codigo_empleado_rep_ventas is null;
+	
+-- 6. Devuelve un listado que muestre los empleados que no tienen una oficina asociada y los
+-- que no tienen un cliente asociado.
+select
+	e.*,
+	c.codigo_empleado_rep_ventas,
+	o.codigo_oficina
+from
+	empleado e
+left join cliente c on
+	e.codigo_empleado = c.codigo_empleado_rep_ventas
+left join oficina o on
+	e.codigo_oficina = o.codigo_oficina
+where
+	c.codigo_empleado_rep_ventas is null
+	or o.codigo_oficina is null;
+	
+-- 7. Devuelve un listado de los productos que nunca han aparecido en un pedido.
+select
+	dp.codigo_producto as codigo_producto_detalle_pedido,
+	p.*
+from
+	producto p
+left join detalle_pedido dp on
+	p.codigo_producto = dp.codigo_producto
+where
+	dp.codigo_producto is null;
+	
+-- 8. Devuelve las oficinas donde no trabajan ninguno de los empleados que hayan sido los
+-- representantes de ventas de algún cliente que haya realizado la compra de algún producto
+-- de la gama Frutales.
+select
+	o2.*
+from
+	oficina o2
+where
+	o2.codigo_oficina not in (
+	select
+		o.codigo_oficina
+	from
+		oficina o
+	left join empleado e on
+		o.codigo_oficina = e.codigo_oficina
+	left join cliente c on
+		e.codigo_empleado = c.codigo_empleado_rep_ventas
+	left join pedido p on
+		c.codigo_cliente = p.codigo_cliente
+	left join detalle_pedido dp on
+		p.codigo_pedido = dp.codigo_pedido
+	left join producto pr on
+		dp.codigo_producto = pr.codigo_producto
+	where
+		pr.gama = 'Frutales');
+		
+-- 9. Devuelve un listado con los clientes que han realizado algún pedido, pero no han realizado
+-- ningún pago.
+select
+	c.*, pa.id_transaccion
+from
+	cliente c
+left join pedido p on
+	c.codigo_cliente = p.codigo_cliente
+left join pago pa on
+	c.codigo_cliente = pa.codigo_cliente 
+where 
+	pa.id_transaccion is null;
+	
+-- 10. Devuelve un listado con los datos de los empleados que no tienen clientes asociados y el
+-- nombre de su jefe asociado.
+select
+	coalesce(concat(e2.nombre, " ", e2.apellido1, " ", e2.apellido2), "No tiene jefe") as nombre_completo_jefe,
+	e.*,
+	c.codigo_empleado_rep_ventas
+from
+	empleado e
+left join cliente c on
+	e.codigo_empleado = c.codigo_empleado_rep_ventas
+left join empleado e2 on 
+	e.codigo_jefe = e2.codigo_empleado
+where
+	c.codigo_empleado_rep_ventas is null;
+
