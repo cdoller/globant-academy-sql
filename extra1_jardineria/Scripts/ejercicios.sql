@@ -451,3 +451,144 @@ left join empleado e2 on
 where
 	c.codigo_empleado_rep_ventas is null;
 
+-- opcion 2
+select
+	distinct e.*,
+	CONCAT(e1.nombre, ' ', e1.apellido1, ' ', e1.apellido2) as 'Jefe'
+from
+	empleado e
+left join cliente c on
+	e.codigo_empleado = c.codigo_empleado_rep_ventas
+left join empleado e1 on
+	e.codigo_jefe = e1.codigo_empleado
+where
+	c.codigo_cliente is null;
+
+-- Consultas resumen:
+-- 1. ¿Cuántos empleados hay en la compañía?
+select count(*) as cantidad_empleados from empleado;
+
+-- 2. ¿Cuántos clientes tiene cada país?
+select count(*) as cantidad_clientes, pais from cliente group by pais; 
+
+-- 3. ¿Cuál fue el pago medio en 2009?
+select avg(total), year(fecha_pago) from pago where year(fecha_pago) = 2009 group by year(fecha_pago); 
+
+-- 4. ¿Cuántos pedidos hay en cada estado? Ordena el resultado de forma descendente por el
+-- número de pedidos.
+select count(*) as cantidad_pedidos, estado from pedido group by estado order by count(*) desc;
+
+-- 5. Calcula el precio de venta del producto más caro y más barato en una misma consulta.
+select
+	max(dp.precio_unidad) as maximo_precio,
+	min(dp.precio_unidad) as minimo_precio
+from
+	detalle_pedido dp;
+
+-- 6. Calcula el número de clientes que tiene la empresa.
+select
+	count(*) as cantidad_clientes
+from
+	cliente;
+
+-- 7. ¿Cuántos clientes tiene la ciudad de Madrid?
+select
+	count(*) as cantidad_clientes, ciudad
+from
+	cliente
+where
+	ciudad = 'Madrid';
+
+-- 8. ¿Calcula cuántos clientes tiene cada una de las ciudades que empiezan por M?
+select
+	count(*) as cantidad_clientes, ciudad
+from
+	cliente
+where
+	ciudad like 'M%'
+group by ciudad;
+
+-- 9. Devuelve el nombre de los representantes de ventas y el número de clientes al que atiende
+-- cada uno.
+select
+	CONCAT(e.nombre, ' ', e.apellido1, ' ', e.apellido2) as 'Nombre',
+	count(c.nombre_cliente)
+from
+	empleado e
+left join cliente c on
+	e.codigo_empleado = c.codigo_empleado_rep_ventas
+where
+	c.nombre_cliente is not null
+group by
+	e.nombre,
+	e.apellido1,
+	e.apellido2
+order by
+	nombre;
+
+-- 10. Calcula el número de clientes que no tiene asignado representante de ventas.
+select 
+	count(*) as cantidad_clientes_sin_representante_ventas
+from
+	cliente
+where
+	codigo_empleado_rep_ventas is null;
+
+-- 11. Calcula la fecha del primer y último pago realizado por cada uno de los clientes. El listado
+-- deberá mostrar el nombre y los apellidos de cada cliente.
+select
+	c.nombre_cliente,
+	min(p.fecha_pago) as primer_pago,
+	case
+		when COUNT(p.id_transaccion) = 1 then 'Tiene un solo pago'
+		else MAX(p.fecha_pago)
+	end as ultimo_pago
+from 
+	cliente c
+left join
+	pago p on
+	c.codigo_cliente = p.codigo_cliente
+where
+	p.id_transaccion is not null
+group by
+	c.nombre_cliente ;
+
+-- 12. Calcula el número de productos diferentes que hay en cada uno de los pedidos.
+-- 13. Calcula la suma de la cantidad total de todos los productos que aparecen en cada uno de
+-- los pedidos.
+select 
+	sum(cantidad) as cantidad_productos_carrito,
+	count(distinct dp.codigo_producto) as cantidad_productos_diferentes,
+	dp.codigo_pedido 
+from detalle_pedido dp 
+group by codigo_pedido ;
+
+-- 14. Devuelve un listado de los 20 productos más vendidos y el número total de unidades que
+-- se han vendido de cada uno. El listado deberá estar ordenado por el número total de
+-- unidades vendidas.
+select 
+	sum(cantidad) as unidades_vendidas, 
+	codigo_producto
+from
+	detalle_pedido
+group by
+	codigo_producto
+order by
+	sum(cantidad) desc
+limit 20;
+
+-- 15. La facturación que ha tenido la empresa en toda la historia, indicando la base imponible, el
+-- IVA y el total facturado. La base imponible se calcula sumando el coste del producto por el
+-- número de unidades vendidas de la tabla detalle_pedido. El IVA es el 21 % de la base
+-- imponible, y el total la suma de los dos campos anteriores.
+-- 217738.00	45724.9800	263462.9800 -- victoria
+-- 217576.00	45690.9600	263266.9600 -- carlos
+select 
+	sum(dp.cantidad * p.precio_proveedor) as base_imponible,
+	sum(dp.cantidad * p.precio_proveedor)*0.21 as iva_21,
+	sum(dp.cantidad * p.precio_proveedor)*1.21 as total
+from
+	detalle_pedido dp 
+left join
+	producto p on
+	dp.codigo_producto = p.codigo_producto ;
