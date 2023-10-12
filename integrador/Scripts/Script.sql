@@ -4,14 +4,16 @@ use nba;
 -- CANDADO A ----------------------------------------------------------------------------------
 -- Posición: 
 -- Teniendo el máximo de asistencias por partido, muestre cuantas veces se logró dicho máximo.
-select
-	count(*) as cuenta,
-	max(Asistencias_por_partido) 
+select 
+	count(*) as cantidad_maximas_asistencias
 from
-	estadisticas e2 
-group by Asistencias_por_partido 
-order by Asistencias_por_partido  desc
-limit 1;
+	estadisticas
+where 
+	Asistencias_por_partido = (
+	select
+		max(Asistencias_por_partido)
+	from
+		estadisticas e2 );
 
 -- Clave: 
 -- Muestre la suma total del peso de los jugadores, donde la conferencia sea Este y la posición sea
