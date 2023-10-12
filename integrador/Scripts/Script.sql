@@ -69,10 +69,7 @@ where
 -- sumar: el promedio de puntos por partido, el conteo de asistencias por partido, y la suma de
 -- tapones por partido. Además, este resultado debe ser, donde la división sea central.
 select
-	floor(avg(e.Puntos_por_partido) + count(e.asistencias_por_partido) + sum(e.Tapones_por_partido)) as suma_total,
-	avg(e.Puntos_por_partido),
-	count(e.asistencias_por_partido),
-	sum(e.Tapones_por_partido)
+	floor(avg(e.Puntos_por_partido) + count(e.asistencias_por_partido) + sum(e.Tapones_por_partido)) as suma_total
 from
 	estadisticas e
 left join jugadores j on e.jugador = j.codigo
